@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+
+    <!--    日志级别 OFF > FATAL > ERROR > WARN > INFO > DEBUG > TRACE > ALL-->
+    <properties>
+        <!--        日志路径-->
+        <property name="FILE_PATH">./logs</property>
+        <!--        日志输出格式-->
+        <property name="LOG_PATTERN">%d [%t] %-5level %logger{36} - %msg%n</property>
+        <!--        日志前缀-->
+        <property name="FILE_NAME">xseed</property>
+        <!--        单个日志大小-->
+        <property name="SIZE">1000MB</property>
+        <!--        日志过期时间-->
+        <property name="EXPIRE">30d</property>
+    </properties>
+
+    <Appenders>
+        <Routing name="RoutingInfo">
+            <Routes pattern="$${ctx:ROUTINGKEY}">
+                <!-- This route is chosen if ThreadContext has no value for key ROUTINGKEY. -->
+                <Route key="$${ctx:ROUTINGKEY}">
+                    <RollingRandomAccessFile name="Rolling-default"
+                                             fileName="${FILE_PATH}/${FILE_NAME}-INFO.log"
+                                             filePattern="${FILE_PATH}/%d{yyyy-MM-dd}/${FILE_NAME}-%d{yyyy-MM-dd}-INFO.log">
+                        <Filters>
+                            <ThresholdFilter level="ERROR" onMatch="DENY" onMismatch="NEUTRAL"/>
+                            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+                        </Filters>
+
+                        <PatternLayout pattern="${LOG_PATTERN}"/>
+                        <Policies>
+                            <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                            <SizeBasedTriggeringPolicy size="${SIZE}"/>
+                        </Policies>
+                        <DefaultRolloverStrategy max="10">
+                            <Delete basePath="${FILE_PATH}" maxDepth="1">
+                                <IfFileName glob="*.log"/>
+                                <IfLastModified age="${EXPIRE}"/>
+                            </Delete>
+                        </DefaultRolloverStrategy>
+                    </RollingRandomAccessFile>
+                </Route>
+
+                <Route>
+                    <RollingRandomAccessFile name="Rolling-${ctx:ROUTINGKEY}"
+                                             fileName="${FILE_PATH}/${ctx:ROUTINGKEY}-INFO.log"
+                                             filePattern="${FILE_PATH}/%d{yyyy-MM-dd}/${ctx:ROUTINGKEY}-%d{yyyy-MM-dd}-INFO.log">
+                        <Filters>
+                            <ThresholdFilter level="ERROR" onMatch="DENY" onMismatch="NEUTRAL"/>
+                            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+                        </Filters>
+                        <PatternLayout pattern="${LOG_PATTERN}"/>
+                        <Policies>
+                            <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                            <SizeBasedTriggeringPolicy size="${SIZE}"/>
+                        </Policies>
+                        <DefaultRolloverStrategy max="10">
+                            <Delete basePath="${FILE_PATH}" maxDepth="1">
+                                <IfFileName glob="*.log"/>
+                                <IfLastModified age="${EXPIRE}"/>
+                            </Delete>
+                        </DefaultRolloverStrategy>
+                    </RollingRandomAccessFile>
+                </Route>
+            </Routes>
+        </Routing>
+
+        <Routing name="RoutingError">
+            <Routes pattern="$${ctx:ROUTINGKEY}">
+                <!-- This route is chosen if ThreadContext has no value for key ROUTINGKEY. -->
+                <Route key="$${ctx:ROUTINGKEY}">
+                    <RollingRandomAccessFile name="Rolling-default"
+                                             fileName="${FILE_PATH}/${FILE_NAME}-ERROR.log"
+                                             filePattern="${FILE_PATH}/%d{yyyy-MM-dd}/${FILE_NAME}-%d{yyyy-MM-dd}-ERROR.log">
+                        <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+                        <PatternLayout pattern="${LOG_PATTERN}"/>
+                        <Policies>
+                            <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                            <SizeBasedTriggeringPolicy size="${SIZE}"/>
+                        </Policies>
+                        <DefaultRolloverStrategy max="10">
+                            <Delete basePath="${FILE_PATH}" maxDepth="1">
+                                <IfFileName glob="*.log"/>
+                                <IfLastModified age="${EXPIRE}"/>
+                            </Delete>
+                        </DefaultRolloverStrategy>
+                    </RollingRandomAccessFile>
+                </Route>
+
+                <Route>
+                    <RollingRandomAccessFile name="Rolling-${ctx:ROUTINGKEY}"
+                                             fileName="${FILE_PATH}/${ctx:ROUTINGKEY}-ERROR.log"
+                                             filePattern="${FILE_PATH}/%d{yyyy-MM-dd}/${ctx:ROUTINGKEY}-%d{yyyy-MM-dd}-ERROR.log">
+                        <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+                        <PatternLayout pattern="${LOG_PATTERN}"/>
+                        <Policies>
+                            <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                            <SizeBasedTriggeringPolicy size="${SIZE}"/>
+                        </Policies>
+                        <DefaultRolloverStrategy max="10">
+                            <Delete basePath="${FILE_PATH}" maxDepth="1">
+                                <IfFileName glob="*.log"/>
+                                <IfLastModified age="${EXPIRE}"/>
+                            </Delete>
+                        </DefaultRolloverStrategy>
+                    </RollingRandomAccessFile>
+                </Route>
+            </Routes>
+        </Routing>
+    </Appenders>
+    <Loggers>
+        <!-- Root logger, used to set the default logging level -->
+        <Root level="INFO">
+            <appender-ref ref="RoutingInfo"/>
+            <appender-ref ref="RoutingError"/>
+        </Root>
+    </Loggers>
+</Configuration>
